@@ -8,6 +8,9 @@ output:
 ---
 
 
+## Step 1: Exploring the data
+
+
 ```r
 library(dplyr)
 ```
@@ -78,4 +81,61 @@ str(obspt)
 # remove X column
 obspt <- obspt %>% dplyr::select(-X)
 ```
+
+## Step 2: Calculating statistics
+
+```r
+obspt.stats <- obspt %>%
+  
+  # compute a row-at-a-time
+  rowwise() %>%
+  
+  # add a mean column
+  mutate(mean = mean(c_across(Week1:Week17), na.rm = TRUE)) %>%
+  
+  # add a sd column
+  mutate(sd = sd(c_across(Week1:Week17), na.rm = TRUE)) %>%
+  
+  # add a CV colume
+  mutate(cv = sd/mean)
+
+head(obspt.stats[,c("Player","mean","sd","cv")])
+```
+
+```
+## # A tibble: 6 x 4
+## # Rowwise: 
+##   Player          mean    sd    cv
+##   <chr>          <dbl> <dbl> <dbl>
+## 1 Davante Adams   25.6 12.5  0.487
+## 2 Josh Jacobs     15.4  8.83 0.572
+## 3 Calvin Ridley   18.8  9.25 0.493
+## 4 Russell Wilson  23.3  7.85 0.337
+## 5 Adam Thielen    16.9  9.86 0.583
+## 6 Aaron Rodgers   24.3  6.15 0.253
+```
+
+## Plot statistics 
+We can subset wide receivers and plot their mean scores on x-axis and standard deviation on y-axis.
+
+
+```r
+obspt.stats.wr <- obspt.stats %>% filter(Position == 'WR')
+
+ggplot(obspt.stats.wr, aes(x = mean, y = sd)) +
+  geom_point(color = "red") +
+  
+  # add straight lines with known slope
+  geom_abline(slope = 0.5) +
+  geom_abline(slope = 1) +
+  geom_abline(slope = 2)
+```
+
+```
+## Warning: Removed 19 rows containing missing values (geom_point).
+```
+
+![](MeanSDCV_scatterplot_files/figure-html/unnamed-chunk-3-1.png)<!-- -->
+
+
 

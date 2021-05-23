@@ -7,9 +7,13 @@ output:
     keep_md: yes
 ---
 
+
+## Step 1: Exploring the data
+
 ```{r}
 library(dplyr)
 library(ggplot2)
+
 
 ### load and process actual fantasy points
 # created by webscrapping_weeklyactualpts.py
@@ -21,4 +25,41 @@ str(obspt)
 obspt <- obspt %>% dplyr::select(-X)
 
 ```
+
+## Step 2: Calculating statistics
+```{r}
+obspt.stats <- obspt %>%
+  
+  # compute a row-at-a-time
+  rowwise() %>%
+  
+  # add a mean column
+  mutate(mean = mean(c_across(Week1:Week17), na.rm = TRUE)) %>%
+  
+  # add a sd column
+  mutate(sd = sd(c_across(Week1:Week17), na.rm = TRUE)) %>%
+  
+  # add a CV colume
+  mutate(cv = sd/mean)
+
+head(obspt.stats[,c("Player","mean","sd","cv")])
+
+```
+
+## Step 3: Plot statistics 
+We can subset wide receivers and plot their mean scores on x-axis and standard deviation on y-axis.
+
+```{r}
+obspt.stats.wr <- obspt.stats %>% filter(Position == 'WR')
+
+ggplot(obspt.stats.wr, aes(x = mean, y = sd)) +
+  geom_point(color = "red") +
+  
+  # add straight lines with known slope
+  geom_abline(slope = 0.5) +
+  geom_abline(slope = 1) +
+  geom_abline(slope = 2)
+```
+
+
 

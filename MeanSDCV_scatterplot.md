@@ -8,32 +8,74 @@ output:
 ---
 
 
+```r
+library(dplyr)
+```
 
-## R Markdown
+```
+## Warning: package 'dplyr' was built under R version 4.0.5
+```
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+```
+## 
+## Attaching package: 'dplyr'
+```
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+```
+## The following objects are masked from 'package:stats':
+## 
+##     filter, lag
+```
 
+```
+## The following objects are masked from 'package:base':
+## 
+##     intersect, setdiff, setequal, union
+```
 
 ```r
-summary(cars)
+library(ggplot2)
 ```
 
 ```
-##      speed           dist       
-##  Min.   : 4.0   Min.   :  2.00  
-##  1st Qu.:12.0   1st Qu.: 26.00  
-##  Median :15.0   Median : 36.00  
-##  Mean   :15.4   Mean   : 42.98  
-##  3rd Qu.:19.0   3rd Qu.: 56.00  
-##  Max.   :25.0   Max.   :120.00
+## Warning: package 'ggplot2' was built under R version 4.0.5
 ```
 
-## Including Plots
+```r
+### load and process actual fantasy points
+# created by webscrapping_weeklyactualpts.py
+obspt <- read.csv('D:/fantasyfootball/data2020/2020_weekly_actualpt.csv')
 
-You can also embed plots, for example:
+str(obspt)
+```
 
-![](MeanSDCV_scatterplot_files/figure-html/pressure-1.png)<!-- -->
+```
+## 'data.frame':	724 obs. of  21 variables:
+##  $ X       : int  0 1 2 3 4 5 6 7 8 9 ...
+##  $ Player  : chr  "Davante Adams" "Josh Jacobs" "Calvin Ridley" "Russell Wilson" ...
+##  $ Team    : chr  "GB" "LV" "ATL" "SEA" ...
+##  $ Position: chr  "WR" "RB" "WR" "QB" ...
+##  $ Week1   : num  41.6 35.9 33.9 31.8 31 30.8 29.1 28.4 28.2 28.2 ...
+##  $ Week2   : num  6.6 13.5 29.9 34.4 6.1 19.2 20.8 24.8 34.5 6.3 ...
+##  $ Week3   : num  NA 9.3 16.7 36.8 12.3 24.5 23.7 NA 32.2 6.3 ...
+##  $ Week4   : num  NA 10.3 0 21.9 26.2 29.6 11.1 NA 25.4 7.8 ...
+##  $ Week5   : num  NA 22.5 21.6 25.5 29.3 NA 25.1 NA 18.3 20.9 ...
+##  $ Week6   : num  12.1 NA 18.9 NA 14.1 5.8 9.3 NA 16.1 11.8 ...
+##  $ Week7   : num  44.6 6.1 19.9 32.9 NA 27.3 24.3 NA 16.4 4.3 ...
+##  $ Week8   : num  30.3 12.9 7.2 28.7 5.7 22.5 NA NA 13.5 10.6 ...
+##  $ Week9   : num  33.3 13.8 NA 24.1 5.8 28.9 6 37.1 36 1.8 ...
+##  $ Week10  : num  18.6 29.6 NA 11.9 20.3 26.4 25.7 NA 29.4 14.3 ...
+##  $ Week11  : num  23.6 13.4 14 20.1 32.3 22.7 10.1 NA NA NA ...
+##  $ Week12  : num  18.1 5.4 17 14.4 NA 25.6 10.5 NA 16.5 0 ...
+##  $ Week13  : num  34.1 NA 15.8 16 21.5 23.5 19.2 NA 30.1 2.4 ...
+##  $ Week14  : num  24.5 10.4 26.4 23.1 6.9 30.9 22.6 NA 19.3 6.1 ...
+##  $ Week15  : num  11.2 20.4 32.3 13 9.1 18.3 30 NA 37.7 11.4 ...
+##  $ Week16  : num  43.2 6.9 17.3 19.9 23.7 26.1 12.8 NA 32.3 4.6 ...
+##  $ Week17  : num  16.6 20.9 10.6 18.1 9.7 26 7.5 NA 20.3 4.2 ...
+```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+```r
+# remove X column
+obspt <- obspt %>% dplyr::select(-X)
+```
+

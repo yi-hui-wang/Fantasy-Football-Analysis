@@ -1,7 +1,7 @@
 ---
-title: "basicstatistics_scatterplot"
+title: "Basic Statistics & Scatterplot"
 author: "yi-hui-wang"
-date: "May 22, 2021"
+date: "May 31, 2021"
 output: 
   html_document: 
     keep_md: yes
@@ -20,21 +20,27 @@ In this topic, you will use R to
 ## Statistical concepts
 The variable in this analysis is the actual score of an NFL player in a week. For each player, there are 17 data points, representing weekly scores in the 2020 season.
 
-### Mean
+### Sample mean
 To understand the average performance of one player, we can simply calculate the mean of these weekly scores, which is the sum of all weekly scores ($y_i$), divided by the number of weeks (n). Its math expression is $\bar{y} = \frac{\sum_{i=1}^{n}{y_i}}{n}$.
 
+### Sample standard deviation
 Each player is unlikely to score the same point every game. While some players score consistently, others may score differently week to week. To measure the variability, we can reply on standard deviation. Conceptually, standard deviation measures the average distance of each data point from the mean. Its math expression is $s = \sqrt{\frac{\sum_{i=1}^{n}{(y_i - \bar{y})^2}}{n-1}}$. Based on its definition, standard deviation is never negative. The larger the standard deviation, the more variability. In this context, a player with a large standard deviation is indicative of unstable performance.
 
-An associated statistic is coefficient of variation, which compares variability to mean ($CV = s/\bar{y}$). Since it shows the magnitude of variability relative to the average state, it is particularly useful when you compare more than one variable that has different units. 
+### Coefficient of variation
+An associated statistic is coefficient of variation, which compares variability to mean. Its math expression is $CV = s/\bar{y}$. Since it shows the magnitude of variability relative to the average state, it is particularly useful when you compare more than one variable that has different units. 
 
 
 
 # Step 1: Exploring the data
+The actual score of each player in the 2020 season was saved in a spreadsheet. To download these data, follow the instruction here. This file has different players in rows and their weekly scores in columns. 
 
-```{r}
+```{r, warning = FALSE, message = FALSE}
 library(dplyr)
 library(ggplot2)
+```
 
+After loading needed libraries, load the spreadsheet and display the format of the data frame.
+```{r}
 ### load and process actual fantasy points
 # created by webscrapping_weeklyactualpts.py
 obspt <- read.csv('D:/fantasyfootball/data2020/2020_weekly_actualpt.csv')
@@ -46,7 +52,11 @@ obspt <- obspt %>% dplyr::select(-X)
 
 ```
 
-## Step 2: Calculating statistics
+
+
+# Step 2: Calculating statistics
+You could use summary() to look at the five-number summary (i.e. minimum, first quantile, median, third quantile, and maximum) for each player. However, it would be inefficient to apply this function to every player. Following the stpes below, you can calculate the mean, standard deviation, and coefficient of variation for each player and show them in new columns. 
+
 ```{r}
 obspt.stats <- obspt %>%
   
@@ -62,16 +72,24 @@ obspt.stats <- obspt %>%
   # add a CV colume
   mutate(cv = sd/mean)
 
-head(obspt.stats[,c("Player","mean","sd","cv")])
-
 ```
 
-## Step 3: Plot statistics 
-We can subset wide receivers and plot their mean scores on x-axis and standard deviation on y-axis.
+Here is the output of the first five players.
 
 ```{r}
+head(obspt.stats[,c("Player","mean","sd","cv")])
+```
+
+
+
+# Step 3: Plot statistics 
+To compare players in terms of their contribution and consistency, you can visualize their mean on x-axis and standard deviation on y-axis in a scatterplot. Below is the scatterplot of wide receivers. You can also add coefficient of variation to the plot as it is a function of mean and standard deviation. 
+
+```{r}
+# subset wide receivers
 obspt.stats.wr <- obspt.stats %>% filter(Position == 'WR')
 
+# scatterplot
 ggplot(obspt.stats.wr, aes(x = mean, y = sd)) +
   geom_point(color = "red") +
   
@@ -81,5 +99,9 @@ ggplot(obspt.stats.wr, aes(x = mean, y = sd)) +
   geom_abline(slope = 2)
 ```
 
+The straight line from top to bottom has coefficient of variation 2, 1, 0.5, respectively. Thanks to these lines, players can be easily categorized by their mean and standard deviation. For example, the players with relatively stable performance are those dots below the bottom line. Note a warning of 19 missing points on the plot. They are not plotted because these players only played one game in the season and therefore didn't have valid sandard deviation.
 
 
+
+# Summary
+In this topic, you have learned to evaluate a player's performance based on three descriptive statistics and a scatterplot. After evaluation, you can filter out players who had little contribution over time when drafting players for a lineup. 

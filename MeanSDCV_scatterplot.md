@@ -115,7 +115,7 @@ head(obspt.stats[,c("Player","mean","sd","cv")])
 ## 6 Aaron Rodgers   24.3  6.15 0.253
 ```
 
-## Plot statistics 
+## Step 3: Plot statistics 
 We can subset wide receivers and plot their mean scores on x-axis and standard deviation on y-axis.
 
 

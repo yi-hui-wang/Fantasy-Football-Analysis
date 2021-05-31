@@ -243,8 +243,8 @@ head(obspt.stats[,c(&quot;Player&quot;,&quot;mean&quot;,&quot;sd&quot;,&quot;cv&
 ## 5 Adam Thielen    16.9  9.86 0.583
 ## 6 Aaron Rodgers   24.3  6.15 0.253</code></pre>
 </div>
-<div id="plot-statistics" class="section level2">
-<h2>Plot statistics</h2>
+<div id="step-3-plot-statistics" class="section level2">
+<h2>Step 3: Plot statistics</h2>
 <p>We can subset wide receivers and plot their mean scores on x-axis and standard deviation on y-axis.</p>
 <pre class="r"><code>obspt.stats.wr &lt;- obspt.stats %&gt;% filter(Position == 'WR')
 

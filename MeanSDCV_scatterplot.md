@@ -7,8 +7,29 @@ output:
     keep_md: yes
 ---
 
+# Topic: Simple evaluation of players' performance
 
-## Step 1: Exploring the data
+The goal of this analysis is to evaluate if a NFL player makes a stable and important contribution to his team. We can use several basic statistics to summarize the average and variability of a player’s performance. We can compare their performance by visulaization.
+
+In this topic, you will use R to 
+
+1.	calculate mean, standard deviation, and coefficient of variation, which measures variability relative to average state.
+
+2.	make a scatter plot.
+
+## Statistical concepts
+The variable in this analysis is the actual score of an NFL player in a week. For each player, there are 17 data points, representing weekly scores in the 2020 season.
+
+### Mean
+To understand the average performance of one player, we can simply calculate the mean of these weekly scores, which is the sum of all weekly scores ($y_i$), divided by the number of weeks (n). Its math expression is $\bar{y} = \frac{\sum_{i=1}^{n}{y_i}}{n}$.
+
+Each player is unlikely to score the same point every game. While some players score consistently, others may score differently week to week. To measure the variability, we can reply on standard deviation. Conceptually, standard deviation measures the average distance of each data point from the mean. Its math expression is $s = \sqrt{\frac{\sum_{i=1}^{n}{(y_i - \bar{y})^2}}{n-1}}$. Based on its definition, standard deviation is never negative. The larger the standard deviation, the more variability. In this context, a player with a large standard deviation is indicative of unstable performance.
+
+An associated statistic is coefficient of variation, which compares variability to mean ($CV = s/\bar{y}$). Since it shows the magnitude of variability relative to the average state, it is particularly useful when you compare more than one variable that has different units. 
+
+
+
+# Step 1: Exploring the data
 
 
 ```r

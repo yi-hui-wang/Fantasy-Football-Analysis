@@ -205,22 +205,221 @@ pre code {
 <div id="root-mean-squared-error-rmse" class="section level3">
 <h3>Root Mean Squared Error (RMSE)</h3>
 <p>RMSE is the root of MAE. Except for bias, the other four metrics are never negative values. When they are zero, predictions are identical to observations. The lower the value, the better the prediction.</p>
-<pre class="r"><code>summary(cars)</code></pre>
-<pre><code>##      speed           dist       
-##  Min.   : 4.0   Min.   :  2.00  
-##  1st Qu.:12.0   1st Qu.: 26.00  
-##  Median :15.0   Median : 36.00  
-##  Mean   :15.4   Mean   : 42.98  
-##  3rd Qu.:19.0   3rd Qu.: 56.00  
-##  Max.   :25.0   Max.   :120.00</code></pre>
+<p>The following codes are divided into two parts. In Part I, I calculated metrics for each player using weekly data in the 2019 season and then compared the average metrics over players for each position. I provided calculation of all metrics introduced, and selected MAE and RMSE for visualization purpose. In Part II, I tracked a specific metric, MAE, each week for all positions to see if predictability of the data source changes over time.</p>
 </div>
 </div>
-<div id="including-plots" class="section level2">
-<h2>Including Plots</h2>
-<p>You can also embed plots, for example:</p>
-<p><img src="data:image/png;base64,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" /><!-- --></p>
-<p>Note that the <code>echo = FALSE</code> parameter was added to the code chunk to prevent printing of the R code that generated the plot.</p>
 </div>
+<div id="exploring-the-data" class="section level1">
+<h1>Exploring the data</h1>
+<p>First, I read in the spreadsheet that included predicted scores from FantasyPro.com and the actual scores of most players in the entire 2019 season. Using str displays the structure of the data frame that each row represents a player, and the columns from left to right represents the name of a player, his team, position, actual points from Week 1 to Week 17, followed by predicted points from Week 1 to Week 17.</p>
+<pre class="r"><code>library(dplyr)  # for pip
+library(ggplot2)
+library(tidyverse)  # for pivot_longer</code></pre>
+<pre class="r"><code>### load data 
+ptdata &lt;- read.csv('D:/fantasyfootball/data-before2020/2019_weekly_actualpredict.csv')
+
+# remove unnecessary column
+ptdata &lt;- ptdata %&gt;% select(-X)
+
+# display data
+str(ptdata)</code></pre>
+<pre><code>## 'data.frame':    526 obs. of  37 variables:
+##  $ Player        : chr  &quot;Sammy Watkins&quot; &quot;Christian McCaffrey&quot; &quot;Austin Ekeler&quot; &quot;DeSean Jackson&quot; ...
+##  $ Team          : chr  &quot;KC&quot; &quot;CAR&quot; &quot;LAC&quot; &quot;PHI&quot; ...
+##  $ Position      : chr  &quot;WR&quot; &quot;RB&quot; &quot;RB&quot; &quot;WR&quot; ...
+##  $ Week1         : num  46.8 42.9 39.4 35.4 34.8 33.6 33.4 31.7 31.1 30.7 ...
+##  $ Week2         : num  10.9 7.3 23.3 0 21.2 30.9 28.7 12.9 9 16.6 ...
+##  $ Week3         : num  11.4 27.8 15.1 NA 2.2 21.3 23.5 25.8 12.7 6.9 ...
+##  $ Week4         : num  6.4 33.9 29.2 NA 6.6 26.5 8.6 11.6 8.1 6.2 ...
+##  $ Week5         : num  0 47.7 22.3 NA NA 14.4 26.2 41.7 15.8 11.2 ...
+##  $ Week6         : num  NA 21.7 5.8 NA NA 30.6 18.2 31.4 16.5 NA ...
+##  $ Week7         : num  NA NA 25.5 NA NA 23.3 21.6 17.5 25.6 NA ...
+##  $ Week8         : num  9.5 27.5 10.2 NA NA NA NA 27.8 21.9 NA ...
+##  $ Week9         : num  13.3 37.6 13.3 1.5 NA 28.6 22.5 19.7 19.4 7.8 ...
+##  $ Week10        : num  10.1 26.1 12.8 NA NA 33.4 26.9 NA NA 18 ...
+##  $ Week11        : num  4.6 30.1 21.2 NA NA 32.8 31.6 5 15 4.3 ...
+##  $ Week12        : num  NA 34.3 NA NA NA 36.3 7.9 19.9 27.4 21.2 ...
+##  $ Week13        : num  0 17.2 16.7 NA NA 22.3 23.7 28.9 15.6 1.1 ...
+##  $ Week14        : num  9 24.5 31.3 NA 4.8 20.8 17.5 30.1 26.2 2.8 ...
+##  $ Week15        : num  9.9 37.5 13.1 NA 4.4 37.1 17.7 18.9 17.9 14.5 ...
+##  $ Week16        : num  4.8 32.3 11.9 NA 15 29.8 11.3 10.1 7.3 1.6 ...
+##  $ Week17        : num  1.8 22.8 17.9 NA 6 NA 29.6 NA NA 3.5 ...
+##  $ Week1_predict : num  10.4 23.1 16.3 9.4 6.8 20 19.1 20.4 21.3 5.9 ...
+##  $ Week2_predict : num  19.8 26.6 19.9 12.8 12 20.1 19.6 20.2 20.7 10.9 ...
+##  $ Week3_predict : num  18.3 24.4 20.1 NA 14.1 20.9 23 19.6 20.6 14.6 ...
+##  $ Week4_predict : num  17.5 23 22.4 NA 12.2 21.2 19.1 20.7 20.9 15.4 ...
+##  $ Week5_predict : num  16.9 23.8 17.4 NA NA 20.9 18.2 20.3 21.1 14.7 ...
+##  $ Week6_predict : num  NA 25.3 16.2 NA NA 22.3 19.6 20.3 19.6 NA ...
+##  $ Week7_predict : num  NA NA 12.5 NA NA 21.8 19.3 20.5 18.9 4.9 ...
+##  $ Week8_predict : num  7.8 22.3 13.8 NA NA NA NA 22.7 20.4 NA ...
+##  $ Week9_predict : num  9.9 24.6 15 8 NA 19.4 21.2 20 18.9 10 ...
+##  $ Week10_predict: num  12 25 13.5 NA NA 24.5 18.9 NA NA 11.4 ...
+##  $ Week11_predict: num  12.9 27.3 13.7 NA NA 23.4 20.8 20.1 18.1 12.6 ...
+##  $ Week12_predict: num  NA 24.2 NA NA 5.8 24.1 17.2 20.3 NA 11.1 ...
+##  $ Week13_predict: num  11.5 27.4 12.5 NA 6.5 23.6 19.3 17 15.1 12.2 ...
+##  $ Week14_predict: num  9.8 26.4 13.7 NA 8.1 22.4 18.4 19.6 17.8 9.6 ...
+##  $ Week15_predict: num  9.8 25.2 15 NA 9.1 23.2 18.9 20.2 19 12.4 ...
+##  $ Week16_predict: num  10 24.6 15.8 NA 9.3 25.4 18.9 21.3 20.3 12.3 ...
+##  $ Week17_predict: num  10.1 26.2 18.8 NA 13.8 NA 19.7 13 7.9 4.6 ...</code></pre>
+</div>
+<div id="part-i" class="section level1">
+<h1>Part I</h1>
+<p>I created a function to calculate the five metrics for a player. Then, I applied the function to every player using a loop.</p>
+<pre class="r"><code>### function to calculate metrics for a player
+performance_metrics_player &lt;- function(df){
+  
+  # actual point
+  obs &lt;- df %&gt;%
+    select(Week1:Week17) %&gt;%
+    
+    # lengthen data
+    pivot_longer(starts_with('Week'), 
+                 names_to = &quot;obs&quot;,
+                 values_to = &quot;point&quot;)
+  
+  # predicted point
+  pre &lt;- df %&gt;%
+    select(Week1_predict:Week17_predict) %&gt;%
+    pivot_longer(starts_with('Week'), 
+                 names_to = &quot;predict&quot;,
+                 values_to = &quot;point&quot;)
+  
+  # exclude NaN point
+  obspredict.nonan &lt;- na.omit(cbind(obs$point, pre$point))
+  
+  # Bias
+  biasi &lt;- mean(obspredict.nonan[,1]-obspredict.nonan[,2])
+  
+  # Mean Absolute Error
+  maei &lt;- mean(abs(obspredict.nonan[,1]-obspredict.nonan[,2]))
+  
+  # Mean Absolute Percentage Error
+  mapei &lt;- mean(abs((obspredict.nonan[,1]-obspredict.nonan[,2])/obspredict.nonan[,1]))*100
+  
+  # Mean Squared Error
+  msei &lt;- mean((obspredict.nonan[,1]-obspredict.nonan[,2])^2)
+  
+  # Root Mean Squared Error
+  rmsei &lt;- sqrt(msei)
+  
+  pm &lt;- c(maei, mapei, rmsei)
+  return(data.frame(bias = biasi, MAE = maei, MAPE = mapei, MSE = msei, RMSE = rmsei))
+}
+
+### calculate metrics for each player
+pm.df &lt;- data.frame(Player = ptdata$Player, Position = ptdata$Position)
+pm &lt;- c()
+
+# apply function to each player
+for (i in 1:nrow(ptdata)){
+  playeri &lt;- ptdata[i,]
+  pm &lt;- rbind(pm, performance_metrics_player(playeri))
+}
+pm.info &lt;- cbind(pm.df, pm)
+
+head(pm.info)</code></pre>
+<pre><code>##                Player Position      bias       MAE      MAPE       MSE
+## 1       Sammy Watkins       WR -2.728571  8.671429       Inf 155.45571
+## 2 Christian McCaffrey       RB  4.487500  9.287500  41.04193 132.24750
+## 3       Austin Ekeler       RB  3.275000  6.787500  37.78079  83.57500
+## 4      DeSean Jackson       WR  2.233333 15.100000       Inf 294.03000
+## 5           John Ross       WR  1.200000  9.525000 136.64772 145.99000
+## 6       Lamar Jackson       QB  5.900000  7.153333  24.18944  70.74067
+##        RMSE
+## 1 12.468188
+## 2 11.499891
+## 3  9.141936
+## 4 17.147303
+## 5 12.082632
+## 6  8.410747</code></pre>
+<p>Above is the five metrics of the first six players in the data frame. Unlike the other five players, there is a negative bias for Sammy Watkins, indicating an overestimated prediction on average. His MAE is an infinite value due to a zero point in the Week 5 game. Although John Ross’ prediction had the bias closest to zero, it had the fourth largest MAE among the six players. The closest to zero bias results from a cancellation between positive and negative errors. Lamar Jackson’s prediction had the largest bias but the smallest RMSE, suggesting the absence of large errors.</p>
+<p>Online platforms use different information in their predictions for different positions (insert reference). For example, …. To investigate if the prediction in one position outperforms others, we calculated the mean metric over players for each position.</p>
+<pre class="r"><code>### calculate mean MAE and RMSE for each position
+pm.qb &lt;- pm.info %&gt;% 
+  filter(Position == 'QB') %&gt;%
+  summarise(MAE_mean = mean(MAE, na.rm = TRUE), RMSE_mean = mean(RMSE, na.rm = TRUE)) %&gt;%
+  mutate(Position = 'QB')
+pm.wr &lt;- pm.info %&gt;% 
+  filter(Position == 'WR') %&gt;%
+  summarise(MAE_mean = mean(MAE, na.rm = TRUE), RMSE_mean = mean(RMSE, na.rm = TRUE)) %&gt;%
+  mutate(Position = 'WR')
+pm.rb &lt;- pm.info %&gt;% 
+  filter(Position == 'RB') %&gt;%
+  summarise(MAE_mean = mean(MAE, na.rm = TRUE), RMSE_mean = mean(RMSE, na.rm = TRUE)) %&gt;%
+  mutate(Position = 'RB')
+pm.te &lt;- pm.info %&gt;% 
+  filter(Position == 'TE') %&gt;%
+  summarise(MAE_mean = mean(MAE, na.rm = TRUE), RMSE_mean = mean(RMSE, na.rm = TRUE)) %&gt;%
+  mutate(Position = 'TE')
+pm.dst &lt;- pm.info %&gt;%
+  filter(Position == 'DST') %&gt;%
+  summarise(MAE_mean = mean(MAE, na.rm = TRUE), RMSE_mean = mean(RMSE, na.rm = TRUE)) %&gt;%
+  mutate(Position = 'DST')
+
+# combine all positions
+pm.all &lt;- rbind(pm.qb, pm.wr, pm.rb, pm.te, pm.dst) %&gt;%
+  
+  # lengthen data for plotting
+  pivot_longer(cols = c(&quot;MAE_mean&quot;,&quot;RMSE_mean&quot;), names_to = &quot;metrics&quot;, values_to = &quot;value&quot;)</code></pre>
+<p>Following calculation, we used a heat map to make a comparison where the darker the color the lower the metrics, the better the predictability. For visualization purpose, we chose two metrics, MAE and RMSE.</p>
+<pre class="r"><code>### plot a heat map to compare metrics between positions
+ggplot(pm.all, aes(x = metrics, y = Position, fill = value)) +
+  geom_tile() </code></pre>
+<p><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAqAAAAHgCAMAAABNUi8GAAACfFBMVEUAAAAAADoAAGYAOpAAZrYTK0MTLEQULUYULkcVL0gWMEoWMUsXMk0XM04YNE8YNVEZNlIZN1QaOFUaOVYbO1gbO1kcPVsdPlwdP10eQF8eQWAfQmIfQ2QgRGUgRWYhRmghR2kiSWsiSWwiSmwjS24kTG8kTXElTnIlT3QmUHUmUXYnUngnU3koVHooVXspVn0pV38qWIAqWYIrWoMsXIUsXYYtXoctX4kuYIouYYwvY44wZI8wZZExZpIxZ5QyaZYyaZczMzMza5k0bJo0bZw1bp41b582caE2caI3cqM3c6Q4dKY4dac5d6k6AAA6ADo6AGY6OmY6OpA6eKs6eaw6kNs7eq47e688fbE9frM9f7Q+gLY+gbc/g7lAhLtAhbxBhr5Bh79CicFDisNDi8REjcZFjshFj8lGkMtGkc1Hk89IlNBIldJJl9RJmNVKmddLm9lLm9pMndxNTU1NTW5NTY5Nbo5NbqtNjshNnt1Nn99OoeFOouNPo+VQpOZQpuhRp+pSqOtSqu1Tq+9UrPBUrvJVr/RWsPZWsfdmAABmADpmAGZmOgBmOpBmtrZmtv9uTU1uTW5uTY5ubo5ubqtujqtujshuq+SOTU2OTW6OTY6Obk2Obm6ObquOjm6Ojo6OjsiOyP+QOgCQOjqQOmaQZgCQkDqQtpCQ27aQ29uQ2/+rbk2rbm6rbo6rjk2rjqurq46ryKur5Mir5P+2ZgC225C22/+2///Ijk3Ijm7IyI7I5KvI/+TI///bkDrb/9vb///kq27kq47k5Kvk/8jk/+Tk///r6+v/tmb/yI7/yKv/25D/27b/29v/5Kv//7b//8j//9v//+T////wiG1cAAAACXBIWXMAAA7DAAAOwwHHb6hkAAAUFklEQVR4nO3dh3cba1rHcSU39N577733GthdenJZCH3pvYMSbOrS2VzYjRPCdbLscrEXWIhzYS8yxFtsYoqwMMhl/iGmSHYmfmzPY1vzfR/59z3xWJ6Rz5k3+px3ZmRb6mRKJVyH3gGljkpAVdIJqEo6AVVJJ6Aq6QRUJd2Jgf53giW5UxMvxVELqFmSOzXxUhy1gJoluVMTL8VRC6hZkjs18VIctYCaJblTEy/FUQuoWZI7NfFSHLWAmiW5UxMvxVELqFmSOzXxUhx1ykA/81z2qnOZgIaJpsIkoGGiqTAJaJhoKkwCGiaaCpOAhommwiSgYaKpMAlomGgqTAIaJpoKk4CGiabCJKBhoqkwCWiYaCpMAhommgqTgIaJpsIkoGGiqTAJaJhoKkwCGiaaCpOAhommwiSgYaKpMAlomGgqTAIaJpoKk4CGiabCJKBhoqkwCWiYaCpMAhommgqTgIaJpsIkoGGiqTAJaJhoKkwCGiaaCpOAhommwiSgYaKpMAlomGgqTAIaJpoKk4CGiabCJKBhoqkwCWiYaCpMAhommgqTgIaJpsKEA11ZyLJBt1jMDue6eTdWBdSMpsKEA12fzz9eKBbzwzuFzfWZvoBa0VSYcKDDu/3dhy8Vi14FtFoK6IFoKkw40O3Xr26/8b9eXM0/PzmDXs479HtoKkw0Faazc3hoRwMtZs7n8zPRfFGdg+4d4TWD1qOpMOEzaLa+sL6QDebzc9FiBh1c7+1tEdBaNBUmHuhg9q29bPh8sSgO8eu6ij8kmgoTD3T7DXf7+YH+z1croLtLswJqRlNh4oFWIldmx9fvw7l5AbWiqTDxQA9PQGvRVJgENEw0FSYBDRNNhUlAw0RTYRLQMNFUmAQ0TDQVJgENE02FSUDDRFNhEtAw0VSYBDRMNBUmAQ0TTYVJQMNEU2ES0DDRVJgENEw0FSYBDRNNhUlAw0RTYRLQMNFUmAQ0TDQVJgENE02FSUDDRFNhEtAw0VSYBDRMNBUmAQ0TTYVJQMNEU2ES0DDRVJgENEw0FSYBDRNNhUlAw0RTYRLQMNFUmAQ0TDQVJgENE02FSUDDRFNhEtAw0VSYBDRMNBUmAQ0TTYUpJNB3Opd9/LlMQMNEU2ES0DDRVJgENEw0FSYBDRNNhUlAw0RTYRLQMNFUmAQ0TDQVJgENE02FSUDDRFNhEtAw0VSYBDRMNBUmAQ0TTYVJQMNEU2ES0DDRVJgENEw0FSYBDRNNhUlAw0RTYRLQMNFUmAQ0TDQVJgENE02FSUDDRFNhEtAw0VSYBDRMNBUmAQ0TTYVJQMNEU2ES0DDRVJgENEw0FSYBDRNNhUlAw0RTYRLQMNFUmAQ0TDQVJgENE02FSUDDRFNhEtAw0VSYBDRMNBUmAQ0TTYVJQMNEU2ES0DDRVJiSALq71C2a+Y+54tP1noBa0VSYkgCaN7yzOlrsJ6C1aCpMAhommgpTqkAv5x16Z5oKE02F6QwAHpcDaHkOOtMfrdMMWoumwpTqDCqgB6KpMAlomGgqTAIaJpoKU1pAy3PQ7oKAWtFUmFIBaiWgtWgqTAIaJpoKk4CGiabCJKBhoqkwCWiYaCpMAhommgqTgIaJpsIkoGGiqTAJaJhoKkwCGiaaCpOAhommwiSgYaKpMJ0O6ObVBwLaVjQVJgENE02FSUDDRFNh8gHdWbyWL9cuPtq80ul0rhVAS6PFYmex07n4SEAnFk2FyTmDrj3zuFC6dfNW5XQf6M7ipWqzgE4omgqTE2jBMf/4v8fV7SeAbhSzZwlXQCcTTYXJCbQ4xpfT5EZ+iL/wJNC1Ttk1AZ1UNBUmJ9Bs45l/y41u3bzw4KkZ1Dy6C+gZRlNh8gLdeu7Nzz7KmRaTaG0Gzb8S0IlGU2HyAs2WO5dKm9nmlRLo1s1r+YH/Qn6RlKM1lQro2URTYXID3ejcKpl2Lvz9zVvlNdOVTud1z1VPM5mzqICeTTQVJjdQfwJ6NtFUmAQ0TDQVJgENE02FSUDDRFNhEtAw0VSYBDRMNBUmAQ0TTYVJQMNEU2FyAn2NnYC2EE2FyQn0T+wEtIVoKkxOoH9sJ6AtRFNhcgL9IzsBbSGaCpMT6B/atQz0Y85l33gucwL9A7vx5p1F4xeaBPRsoqkwOYH+vt148/Kt6neZBXQC0VSYnEB/z260detP2/mzY5oKE02FyQm06HdrPbll85V/q0P8xKKpMDmBvtpuDPTKrRypDvGTiabC5AT6O3ZjoDnOreeenkIF9GyiqTA5gf623Wjr1msFdHLRVJicQH/Lbrx5WYf4yUVTYXIC/U278eatm8brhwno2URTYXIC/Q27I50J6NlEU2FyAv11OwFtIZoKkxPor9oJaAvRVJicQH/FTkBbiKbC5AT6y3YC2kI0FSYn0F+yE9AWoqkwOYH+ol1zoOWL2x/yYvYCemQ0FSYn0F+wawy0fCX7pgloLZoKkxPoz9s1Bmq+iL2ANoqmwuQE+nN2jYHuLAroSaOpMDmB/qxdY6DZRqOzTwE1oqkwOYH+jF1joFs3O7pIOmE0FSYn0J+2awzUlYDWoqkwOYH+lJ2AthBNhckJ9CftHEDXDnm7LwE9LpoKkxPoT9g1B7pWvWNiI6ECWoumwuQE+uN2jYGOngdtdi0voLVoKkxOoD9mJ6AtRFNhcgL9UbvGQHWIP3k0FSYn0B+xaw5UF0knjqbC5AT6w3YOoI4EtBZNhckJ9IfsBLSFaCpMTqA/aNcMaH6FpB91njyaCpMT6KvsmgH1JqC1aCpMTqA/YNcYqJ5mOnk0FSYn0O+3E9AWoqkwOYF+n11DoGudcY3+8ENAa9FUmJxAv9euIVD9ycdpoqkwOYF+j11joGbDuW7ejdXRjQUBNaOpMDmBfrfdePOa9QzSsU8zDe+s5sv1mX55Y3i7J6BWNBUmJ9DvshtvXrYO4MfPoCXQfFne2H0ooGY0FSYn0O+0G23dedOBd1BoDnRvBr3bz7+6nHfoN9BUmGgqTMfhMfqOWk9uKQ/gBybRTv0utw68ym116jnT379RpRm0Fk2FyTmDfpvdaOvm1QfGLFoDunyp+I27tdrTTMXEObjeG02lu0vjqyQBrUVTYXIC/Va7GsGnp9CnnmYqXv1m4+BF0npxFV8e61cE1IymwuQE+i12HqDFbysbQHeXZqsb2/d7AmpFU2FyAv1mu9HW4n06d/7m0KeZsuKlb65tXHhQHOifBpqfgM7redCjoqkwOYF+k91481rnuLdC3LzSuZQtH3jDWTMBrUVTYXIC/Qa7I53p1+3OJpoKkxPoK+wEtIVoKkxOoC+3cwDVH82dNJoKkxPoy+yaA9WfHZ84mgqTE+jX2zUGql9YPnk0FSYn0K+zE9AWoqkwOYF+rV1joDrEnzyaCpMT6NfYNQeqi6QTR1NhcgL9ajsHUEcCWoumwuQE+lV2AtpCNBUmJ9CvtGsKdLnha4oIqBFNhckJ9CvsGgItfga/1lyogNaiqTA5gX65XTOg5bt4Od7KS0Br0VSYnEC/zK4Z0PJJ0J3FZpfwAvp0NBUmJ9AvtRPQFqKpMDmBfomdgLYQTYXJCfSL7QS0hWgqTE6gX2TXFOjei4fpZ/H+aCpMTqBfaNcMqDcBrUVTYXIC/QI7AW0hmgqTE+jn2wloC9FUmJxAP89OQFuIpsLkBPq5dgLaQjQVJifQz7ET0BaiqTA5gX62nYC2EE2FyQn0s+wEtIVoKkxOoJ9hJ6AtRFNhcgL9dDsBbSGaCpMT6KfZCWgL0VSYnEA/1W7/DsbvIwvo2URTYXIC/RS7/TusHfMa9QJ64mgqTE6gn2y3t33z2/9MQCcUTYXJCbTok2rVNu286R90iJ9UNBUmJ9BPtBtvXrumc9CJRVNhcgL9BLvR1s1XPm4F6CFvhjPlveZc5gT6cXajrdXbbT/9Jx0CejbRVJicQD/Wbv8OmkEnFk2FyQn0kNMjAW0hmgqTE+hH2x3pTEDPJpoKkxPoR9kJaAvRVJicQD/STkBbiKbC5AT6EXYC2kI0FSYn0A+3E9AWoqkwOYF+mJ2AthBNhckJ9EPtBLSFaCpMTqAfYiegLURTYXIC/WA7AW0hmgqTE+gH2QloC9FUmJxAP9BOQFuIpsLkBPoBdgLaQjQVJifQ97cT0BaiqTA5gb6fnYC2EE2FyQn0fe0EtIVoKkxOoO9jJ6AtRFNhcgJ9bzsBbSGaCpMT6HvZCWgL0VSYnEDf005AW4imwuQE+h52AtpCNBUmJ9B3txPQFqKpMDmBvpudgLYQTYXJCfRd7QS0hWgqTE6g72InoC1EU2FyAn1nOwFtIZoKkxPoSRLQs4mmwiSgYaKpMAlomGgqTAIaJpoKk4CGiabCJKBhoqkwCWiYaCpMAhommgqTgIaJpsKUBtD1bre7kGXDuW51Q0CNaCpMSQBdmeln2/cWsuGd1Vzp7Z6AWtFUmFIAWrrMBjP98sbuQwE1o6kwpQB0MFsst+/3qhn0bj//6nLeod9AU2GiqTCdncNDOxboegk0nzmrc9CZ/mi9ZtBaNBWm9GbQ3aXxVZKA1qKpMKUAtHD5P7380F6djK4IqBlNhSkFoNn6TH/7Xnd0FZ/PpAJqRVNhSgJo8Tzojbd15/U86FHRVJjSAGonoLVoKkwCGiaaCpOAhommwiSgYaKpMAlomGgqTAIaJpoKk4CGiabCJKBhoqkwCWiYaCpMAhommgqTgIaJpsIkoGGiqTAJaJhoKkwCGiaaCpOAhommwiSgYaKpMAlomGgqTAIaJpoKk4CGiabCJKBhoqkwCWiYaCpMAhommgqTgIaJpsIkoGGiqTAJaJhoKkwCGiaaCpOAhommwiSgYaKpMAlomGgqTAIaJpoKk4CGiabCJKBhoqkwCWiYaCpMAhommgqTgIaJpsIUEujLzmWvPpcJaJhoKkwCGiaaCpOAhommwiSgYaKpMAlomGgqTAIaJpoKk4CGiabCJKBhoqkwCWiYaCpMAhommgqTgIaJpsIkoGGiqTAJaJhoKkwCGiaaCpOAhommwiSgYaKpMAlomGgqTAIaJpoKk4CGiabCJKBhoqkwCWiYaCpMAhommgqTgIaJpsIkoGGiqTAJaJhoKkwCGiaaCpOAhommwiSgYaKpMAlomGgqTAIaJpoKk4CGiabCJKBhoqkwCWiYaCpMAhommgqTgIaJpsIkoGGiqTAJaJhoKkwCGiaaChMKdDjXzVvIb23f63ZvrO4uFV93Z/oCakRTYWKB3lktbC6UH9l6AbNclQmoEU2FiQeaDe/2K6n3ewJ6RDQVpgSA5jB3l8aH9THQy3mHfh9NhYmmwnR2Dg/tOKC7D3tZNuh2r/cyzaBHRFNhSmMGrb663RPQI6KpMCUAdDDTH8wWX64sCOgR0VSYeKB7V/G6SDo6mgoTC7T2PKjOQY+OpsKEAj0mAa1FU2ES0DDRVJgENEw0FSYBDRNNhUlAw0RTYRLQMNFUmAQ0TDQVJgENE02FSUDDRFNhEtAw0VSYBDRMNBUmAQ0TTYVJQMNEU2ES0DDRVJgENEw0FSYBDRNNhUlAw0RTYRLQMNFUmAQ0TDQVJgENE02FSUDDRFNhEtAw0VSYBDRMNBUmAQ0TTYVJQMNEU2ES0DDRVJgENEw0FSYBDRNNhUlAw0RTYRLQMNFUmAQ0TDQVJgENE02FSUDDRFNhEtAw0VSYBDRMNBWmkEDBktypiZfiqAXULMmdmngpjlpAzZLcqYmX4qgF1CzJnZp4KY5aQM2S3KmJl+KoBdQsyZ2aeCmOWkDNktypiZfiqAXULMmdmngpjjoBoCl2md4BpOketYCGb7pHLaDhm+5RC2j4pnvUUwVUTV8CqpJOQFXSCahKOgFVSRcK6HBuNl+u3FjNsu37veLrbt71Hrxbk6saYD7e/ZFv3xutmPKhj4sF9PZf9LPtN9zJgQ5emM+/Lm5Nc9UA12f6eyPfvrdQrZj2oY+LBfTOX/Wy4Qv5Y7P78J/f2H8a6O7Dt3S784P8IysmmmKiLSaahWx49x+LT/GqBpgv90ZerskPH1M/9HHBgL5tIfv3l/LHZni3v7JwAOjSbHksLFavzGfrs+WJQPHwzs1ng5k+tdsnb38GHY98d6kax9QPfVwwoG9/fvfFt+cPwnr+3z47OhHb++/ffdgrP/LHpnh4tl9fPob5p+JhC3lM3Bvg/sizQXnqOfVDHxcM6Dv+6T//eljMI+W1w4Hj3P6jdG90CbEyvl/IR6nY6UExjL2RV6tvHzzET9vQxwUDuvrWt8wXB667+dSxsnDEozSaQu4tVGdwQR+lcqfXb6zuj3xQXM2fh6GPiwY0n0/y5Xpx2j+YPfxRKk7EBtW17mi6CfkolTtdnl+OR15exVsXSdM29HHRgJb/3vFi8T++ff+l8kRs7yL1yUcpP9AVh7n1bvfX/nIh7KM0uoqfmx+PvHoedO8cdIqHPi4UUHX+mgago9nkHPxY5UDTP/RpAKqmOAFVSSegKukEVCWdgJ5B//uv1efNqw/YHZnCBPT0yeUEE9DTJ6ATTEBdbV5985VO59pmvriVZTuLnc7FR5vlmmf/rnPxX3KpxbpLxT3ztcV91OkSUFebV555nK11isXFRzuLucS1Zx4XM+jmlUvlVFqs27p5q5pVN69I6GkTUFcluWpx9cHGxUdZobECWq0bH+43n30E7+qUJKCuqolxtFjrlF0rgY7WlWiLlqsjvTplAuqqDjQ/0o9XHgBazK2di5pGT5uAuqoB3bjwYG/leF3tir44GVWnS0Bd1YDuLOZTaK50/6KoukgqPsqZVM8/nT4BdVUDWj6lVMyiy51LtXXFyedGp9qmTpeAqqQTUJV0AqqSTkBV0gmoSjoBVUknoCrpBFQlnYCqpBNQlXT/D/vrOqKRYfXMAAAAAElFTkSuQmCC" /><!-- --></p>
+<p>Among all positions, the prediction of tie ends appears to be the best in both metrics, whereas that of quarter backs appears to be the worst.</p>
+</div>
+<div id="part-ii" class="section level1">
+<h1>Part II</h1>
+<p>A following question is whether the predictability of each position varies week by week. To answer this question, we created a function to calculate MAE for players in one position of a week. We then applied this function to each position every week and tracked the metric throughout the whole season.</p>
+<pre class="r"><code>### function to calculate metrics for a position in a week
+performance_metrics_week &lt;- function(X,output){
+  
+  # X has position and week information
+  ipos &lt;- X[1]
+  iwk &lt;- X[2]
+  
+  # subset players for a certain position
+  posi &lt;- ptdata %&gt;%
+    filter(Position == ipos)
+  
+  # subset a certain week
+  obspredict &lt;- cbind(posi[paste0('Week',iwk)], posi[paste0('Week',iwk,'_predict')]) 
+  obspredict.nonan &lt;- na.omit(obspredict[1:2])
+  
+  # calculate MAE using players for a certain position in a certain week
+  maei &lt;- mean(abs(obspredict.nonan[,1]-obspredict.nonan[,2]))
+  return(maei)
+}
+
+# loop through weeks and positions
+iwk &lt;- as.character(c(seq(1,17)))
+ipos &lt;- c('QB','WR','RB','TE','DST')
+
+# create a data frame from a combination of positions and weeks
+poswk &lt;- expand.grid(ipos,iwk)
+
+# name columns
+names(poswk)&lt;-c(&quot;ipos&quot;,&quot;iwk&quot;)
+
+# apply the function to each position-week combination
+mae_all &lt;- apply(poswk, 1, performance_metrics_week)
+
+# attach MAE to position-week information
+mae_poswk &lt;- cbind(poswk,mae_all)</code></pre>
+<p>Unlike Part I that used a for loop, Part II used the ‘apply’ function to carry out the custom function to each row of a data frame. There are several ways to do this work – some take less time while others may take longer time. Readers can explore different ways to see if same results are obtained.</p>
+<pre class="r"><code>### plot a heat map to compare metrics between positions
+ggplot(mae_poswk, aes(x = iwk, y = mae_all, colour = ipos, group = ipos)) +
+  geom_line() +
+  xlab(&quot;Week&quot;) +
+  ylab(&quot;MAE&quot;) +
+  labs(color = &quot;Position&quot;)</code></pre>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+<p>The time series plot shows MAE of each position over 17 weeks. Throughout the season, tie end predictions remain to be the best. Although the quarter back prediction is the worst in general, it is not always the worst. The MAE of the quarter back prediction is lower than the defense prediction in Week 4, 10, and 15. MAE of each position varies week to week and displays large swing sometimes. For example, the MAE of the previous week could be as twice as this week.</p>
+</div>
+<div id="summary" class="section level1">
+<h1>Summary</h1>
+<p>In summary, you learned how to calculate commonly used performance metrics and apply them to fantasy football data for different questions. The results can help evaluate the predictability of the data that hopefully can benefit your decision making in drafting players. The codes can be applicable to another data source or another reason, which could result in different conclusions about performance.</p>
+<p>Since the prediction provided from online platforms has noticeable errors, our next topic is to explore approaches to improve these predicted points and/or create our own prediction.</p>
 </div>
 
 

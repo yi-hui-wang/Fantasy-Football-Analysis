@@ -43,18 +43,190 @@ Evidence by its name, MSE is the mean of the square of errors. Its unit is the s
 RMSE is the root of MAE.
 Except for bias, the other four metrics are never negative values. When they are zero, predictions are identical to observations. The lower the value, the better the prediction. 
 
+The following codes are divided into two parts. In Part I, I calculated metrics for each player using weekly data in the 2019 season and then compared the average metrics over players for each position. I provided calculation of all metrics introduced, and selected MAE and RMSE for visualization purpose. In Part II, I tracked a specific metric, MAE, each week for all positions to see if predictability of the data source changes over time. 
+
+# Exploring the data
+First, I read in the spreadsheet that included predicted scores from FantasyPro.com and the actual scores of most players in the entire 2019 season. Using str displays the structure of the data frame that each row represents a player, and the columns from left to right represents the name of a player, his team, position, actual points from Week 1 to Week 17, followed by predicted points from Week 1 to Week 17. 
 
 
-```{r cars}
-summary(cars)
+```{r, warning = FALSE, message = FALSE}
+library(dplyr)  # for pip
+library(ggplot2)
+library(tidyverse)  # for pivot_longer
 ```
 
-## Including Plots
+```{r}
+### load data 
+ptdata <- read.csv('D:/fantasyfootball/data-before2020/2019_weekly_actualpredict.csv')
 
-You can also embed plots, for example:
+# remove unnecessary column
+ptdata <- ptdata %>% select(-X)
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+# display data
+str(ptdata)
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+# Part I
+I created a function to calculate the five metrics for a player. Then, I applied the function to every player using a loop. 
+
+```{r}
+### function to calculate metrics for a player
+performance_metrics_player <- function(df){
+  
+  # actual point
+  obs <- df %>%
+    select(Week1:Week17) %>%
+    
+    # lengthen data
+    pivot_longer(starts_with('Week'), 
+                 names_to = "obs",
+                 values_to = "point")
+  
+  # predicted point
+  pre <- df %>%
+    select(Week1_predict:Week17_predict) %>%
+    pivot_longer(starts_with('Week'), 
+                 names_to = "predict",
+                 values_to = "point")
+  
+  # exclude NaN point
+  obspredict.nonan <- na.omit(cbind(obs$point, pre$point))
+  
+  # Bias
+  biasi <- mean(obspredict.nonan[,1]-obspredict.nonan[,2])
+  
+  # Mean Absolute Error
+  maei <- mean(abs(obspredict.nonan[,1]-obspredict.nonan[,2]))
+  
+  # Mean Absolute Percentage Error
+  mapei <- mean(abs((obspredict.nonan[,1]-obspredict.nonan[,2])/obspredict.nonan[,1]))*100
+  
+  # Mean Squared Error
+  msei <- mean((obspredict.nonan[,1]-obspredict.nonan[,2])^2)
+  
+  # Root Mean Squared Error
+  rmsei <- sqrt(msei)
+  
+  pm <- c(maei, mapei, rmsei)
+  return(data.frame(bias = biasi, MAE = maei, MAPE = mapei, MSE = msei, RMSE = rmsei))
+}
+
+### calculate metrics for each player
+pm.df <- data.frame(Player = ptdata$Player, Position = ptdata$Position)
+pm <- c()
+
+# apply function to each player
+for (i in 1:nrow(ptdata)){
+  playeri <- ptdata[i,]
+  pm <- rbind(pm, performance_metrics_player(playeri))
+}
+pm.info <- cbind(pm.df, pm)
+
+head(pm.info)
+```
+
+Above is the five metrics of the first six players in the data frame. Unlike the other five players, there is a negative bias for Sammy Watkins, indicating an overestimated prediction on average. His MAE is an infinite value due to a zero point in the Week 5 game. Although John Ross’ prediction had the bias closest to zero, it had the fourth largest MAE among the six players. The closest to zero bias results from a cancellation between positive and negative errors. Lamar Jackson’s prediction had the largest bias but the smallest RMSE, suggesting the absence of large errors.
+
+Online platforms use different information in their predictions for different positions (insert reference). For example, …. To investigate if the prediction in one position outperforms others, we calculated the mean metric over players for each position. 
+
+```{r}
+### calculate mean MAE and RMSE for each position
+pm.qb <- pm.info %>% 
+  filter(Position == 'QB') %>%
+  summarise(MAE_mean = mean(MAE, na.rm = TRUE), RMSE_mean = mean(RMSE, na.rm = TRUE)) %>%
+  mutate(Position = 'QB')
+pm.wr <- pm.info %>% 
+  filter(Position == 'WR') %>%
+  summarise(MAE_mean = mean(MAE, na.rm = TRUE), RMSE_mean = mean(RMSE, na.rm = TRUE)) %>%
+  mutate(Position = 'WR')
+pm.rb <- pm.info %>% 
+  filter(Position == 'RB') %>%
+  summarise(MAE_mean = mean(MAE, na.rm = TRUE), RMSE_mean = mean(RMSE, na.rm = TRUE)) %>%
+  mutate(Position = 'RB')
+pm.te <- pm.info %>% 
+  filter(Position == 'TE') %>%
+  summarise(MAE_mean = mean(MAE, na.rm = TRUE), RMSE_mean = mean(RMSE, na.rm = TRUE)) %>%
+  mutate(Position = 'TE')
+pm.dst <- pm.info %>%
+  filter(Position == 'DST') %>%
+  summarise(MAE_mean = mean(MAE, na.rm = TRUE), RMSE_mean = mean(RMSE, na.rm = TRUE)) %>%
+  mutate(Position = 'DST')
+
+# combine all positions
+pm.all <- rbind(pm.qb, pm.wr, pm.rb, pm.te, pm.dst) %>%
+  
+  # lengthen data for plotting
+  pivot_longer(cols = c("MAE_mean","RMSE_mean"), names_to = "metrics", values_to = "value")
+```
+
+
+Following calculation, we used a heat map to make a comparison where the darker the color the lower the metrics, the better the predictability. For visualization purpose, we chose two metrics, MAE and RMSE. 
+
+```{r}
+### plot a heat map to compare metrics between positions
+ggplot(pm.all, aes(x = metrics, y = Position, fill = value)) +
+  geom_tile() 
+```
+
+Among all positions, the prediction of tie ends appears to be the best in both metrics, whereas that of quarter backs appears to be the worst.
+
+# Part II
+
+A following question is whether the predictability of each position varies week by week. To answer this question, we created a function to calculate MAE for players in one position of a week. We then applied this function to each position every week and tracked the metric throughout the whole season.
+
+```{r}
+### function to calculate metrics for a position in a week
+performance_metrics_week <- function(X,output){
+  
+  # X has position and week information
+  ipos <- X[1]
+  iwk <- X[2]
+  
+  # subset players for a certain position
+  posi <- ptdata %>%
+    filter(Position == ipos)
+  
+  # subset a certain week
+  obspredict <- cbind(posi[paste0('Week',iwk)], posi[paste0('Week',iwk,'_predict')]) 
+  obspredict.nonan <- na.omit(obspredict[1:2])
+  
+  # calculate MAE using players for a certain position in a certain week
+  maei <- mean(abs(obspredict.nonan[,1]-obspredict.nonan[,2]))
+  return(maei)
+}
+
+# loop through weeks and positions
+iwk <- as.character(c(seq(1,17)))
+ipos <- c('QB','WR','RB','TE','DST')
+
+# create a data frame from a combination of positions and weeks
+poswk <- expand.grid(ipos,iwk)
+
+# name columns
+names(poswk)<-c("ipos","iwk")
+
+# apply the function to each position-week combination
+mae_all <- apply(poswk, 1, performance_metrics_week)
+
+# attach MAE to position-week information
+mae_poswk <- cbind(poswk,mae_all)
+```
+
+Unlike Part I that used a for loop, Part II used the ‘apply’ function to carry out the custom function to each row of a data frame. There are several ways to do this work – some take less time while others may take longer time. Readers can explore different ways to see if same results are obtained.
+
+```{r}
+### plot a heat map to compare metrics between positions
+ggplot(mae_poswk, aes(x = iwk, y = mae_all, colour = ipos, group = ipos)) +
+  geom_line() +
+  xlab("Week") +
+  ylab("MAE") +
+  labs(color = "Position")
+```
+
+The time series plot shows MAE of each position over 17 weeks. Throughout the season, tie end predictions remain to be the best. Although the quarter back prediction is the worst in general, it is not always the worst. The MAE of the quarter back prediction is lower than the defense prediction in Week 4, 10, and 15. MAE of each position varies week to week and displays large swing sometimes. For example, the MAE of the previous week could be as twice as this week.
+
+# Summary
+In summary, you learned how to calculate commonly used performance metrics and apply them to fantasy football data for different questions. The results can help evaluate the predictability of the data that hopefully can benefit your decision making in drafting players.  The codes can be applicable to another data source or another reason, which could result in different conclusions about performance. 
+
+Since the prediction provided from online platforms has noticeable errors, our next topic is to explore approaches to improve these predicted points and/or create our own prediction.
+

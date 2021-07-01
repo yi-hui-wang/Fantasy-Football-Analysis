@@ -173,7 +173,7 @@ pre code {
 
 <div id="topic-evaluate-the-performance-of-predicted-scores" class="section level1">
 <h1>Topic: Evaluate the performance of predicted scores</h1>
-<p>Some online platforms such as FantasyPros (insert link) provide predicted scores of each player before a game so fantasy football players can draft an optimal lineup within the salary cap based on these predictions. However, these predictions are not perfect because of flawed predicting methods and uncontrollable conditions in real life such as player injuries. Imperfect predictions could be costly in rewards as they can lead to suboptimal lineups. Despite drawbacks, predicted scores from online platforms can still be useful as they do positively correlate with actual points sometimes and can save users time and efforts to make their own predictions. In this topic, we will evaluate performance of predicted scores by measuring their deviations from actual scores in different ways. With these measures, we can better 1. understand how predictable of each player and each position and 2. investigate whether predictability changes over time.</p>
+<p>Some online platforms such as FantasyPros provide predicted scores of each player before a game so fantasy football players can draft an optimal lineup within the salary cap based on these predictions. However, these predictions are not perfect because of flawed predicting methods and uncontrollable conditions in real life such as player injuries. Imperfect predictions could be costly in rewards as they can lead to suboptimal lineups. Despite drawbacks, predicted scores from online platforms can still be useful as they do positively correlate with actual points sometimes and can save users time and efforts to make their own predictions. In this topic, we will evaluate performance of predicted scores by measuring their deviations from actual scores in different ways. With these measures, we can better 1. understand how predictable of each player and each position and 2. investigate whether predictability changes over time.</p>
 <p>In this topic, you will use R to</p>
 <ol style="list-style-type: decimal">
 <li><p>calculate several performance metrics.</p></li>
@@ -181,7 +181,7 @@ pre code {
 </ol>
 <div id="statistical-concepts" class="section level2">
 <h2>Statistical concepts</h2>
-<p>To evaluate the performance of predicted scores, we need to compare predicted scores to actual scores. There are a variety of metrics, which describe the comparison in one number from different perspectives (<a href="https://arxiv.org/abs/1809.03006" class="uri">https://arxiv.org/abs/1809.03006</a>). Which one to use depends on the context of questions. Here, you will learn several metrics that are commonly used and easily implemented to fantasy football data.</p>
+<p>To evaluate the performance of predicted scores, we need to compare predicted scores to actual scores. There are a variety of metrics, which describe the comparison in one number from different perspectives (Botchkarev 2019). Which one to use depends on the context of questions. Here, you will learn several metrics that are commonly used and easily implemented to fantasy football data.</p>
 </div>
 <div id="performance-metrics" class="section level2">
 <h2>Performance Metrics</h2>
@@ -214,9 +214,12 @@ pre code {
 <p>First, I read in the spreadsheet that included predicted scores from FantasyPro.com and the actual scores of most players in the entire 2019 season. Using str displays the structure of the data frame that each row represents a player, and the columns from left to right represents the name of a player, his team, position, actual points from Week 1 to Week 17, followed by predicted points from Week 1 to Week 17.</p>
 <pre class="r"><code>library(dplyr)  # for pip
 library(ggplot2)
-library(tidyverse)  # for pivot_longer</code></pre>
+library(tidyverse)  # for pivot_longer
+library(RCurl)  # link to data saved in googledrive</code></pre>
+<p>```</p>
 <pre class="r"><code>### load data 
-ptdata &lt;- read.csv('D:/fantasyfootball/data-before2020/2019_weekly_actualpredict.csv')
+link &lt;- &quot;https://drive.google.com/uc?export=download&amp;id=1cVU5r2RQJQi94KK6jDBagFK8hqHAsE5S&quot;
+ptdata &lt;- read.csv(link)
 
 # remove unnecessary column
 ptdata &lt;- ptdata %&gt;% select(-X)
@@ -420,6 +423,10 @@ ggplot(mae_poswk, aes(x = iwk, y = mae_all, colour = ipos, group = ipos)) +
 <h1>Summary</h1>
 <p>In summary, you learned how to calculate commonly used performance metrics and apply them to fantasy football data for different questions. The results can help evaluate the predictability of the data that hopefully can benefit your decision making in drafting players. The codes can be applicable to another data source or another reason, which could result in different conclusions about performance.</p>
 <p>Since the prediction provided from online platforms has noticeable errors, our next topic is to explore approaches to improve these predicted points and/or create our own prediction.</p>
+<div id="reference" class="section level3">
+<h3>Reference</h3>
+<p>Botchkarev 2019: A New Typology Design of Performance Metrics to Measure Errors in Machine Learning Regression Algorithms, Interdisciplinary Journal of Information, Knowledge, and Management, 14, 45-76, <a href="https://doi.org/10.28945/4184" class="uri">https://doi.org/10.28945/4184</a></p>
+</div>
 </div>
 
 

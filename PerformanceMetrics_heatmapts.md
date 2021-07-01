@@ -11,7 +11,7 @@ output:
 
 # Topic: Evaluate the performance of predicted scores
 
-Some online platforms such as FantasyPros (insert link) provide predicted scores of each player before a game so fantasy football players can draft an optimal lineup within the salary cap based on these predictions. However, these predictions are not perfect because of flawed predicting methods and uncontrollable conditions in real life such as player injuries. Imperfect predictions could be costly in rewards as they can lead to suboptimal lineups. Despite drawbacks, predicted scores from online platforms can still be useful as they do positively correlate with actual points sometimes and can save users time and efforts to make their own predictions. In this topic, we will evaluate performance of predicted scores by measuring their deviations from actual scores in different ways. With these measures, we can better 1. understand how predictable of each player and each position and 2. investigate whether predictability changes over time.
+Some online platforms such as FantasyPros provide predicted scores of each player before a game so fantasy football players can draft an optimal lineup within the salary cap based on these predictions. However, these predictions are not perfect because of flawed predicting methods and uncontrollable conditions in real life such as player injuries. Imperfect predictions could be costly in rewards as they can lead to suboptimal lineups. Despite drawbacks, predicted scores from online platforms can still be useful as they do positively correlate with actual points sometimes and can save users time and efforts to make their own predictions. In this topic, we will evaluate performance of predicted scores by measuring their deviations from actual scores in different ways. With these measures, we can better 1. understand how predictable of each player and each position and 2. investigate whether predictability changes over time.
 
 In this topic, you will use R to 
 
@@ -20,7 +20,7 @@ In this topic, you will use R to
 2.	make a heat map and time series plot to visualize performance metrics.
 
 ## Statistical concepts
-To evaluate the performance of predicted scores, we need to compare predicted scores to actual scores. There are a variety of metrics, which describe the comparison in one number from different perspectives (https://arxiv.org/abs/1809.03006). Which one to use depends on the context of questions. Here, you will learn several metrics that are commonly used and easily implemented to fantasy football data. 
+To evaluate the performance of predicted scores, we need to compare predicted scores to actual scores. There are a variety of metrics, which describe the comparison in one number from different perspectives (Botchkarev 2019). Which one to use depends on the context of questions. Here, you will learn several metrics that are commonly used and easily implemented to fantasy football data. 
 
 ## Performance Metrics
 All following metrics contain the component of error, defined as the distance between an actual value and a predicted value. In the fantasy football context, error represents the difference between an actual point and a predicted point.  
@@ -52,12 +52,14 @@ First, I read in the spreadsheet that included predicted scores from FantasyPro.
 library(dplyr)  # for pip
 library(ggplot2)
 library(tidyverse)  # for pivot_longer
+library(RCurl)  # link to data saved in googledrive
 ```
-
+```
 
 ```r
 ### load data 
-ptdata <- read.csv('D:/fantasyfootball/data-before2020/2019_weekly_actualpredict.csv')
+link <- "https://drive.google.com/uc?export=download&id=1cVU5r2RQJQi94KK6jDBagFK8hqHAsE5S"
+ptdata <- read.csv(link)
 
 # remove unnecessary column
 ptdata <- ptdata %>% select(-X)
@@ -293,7 +295,10 @@ ggplot(mae_poswk, aes(x = iwk, y = mae_all, colour = ipos, group = ipos)) +
 The time series plot shows MAE of each position over 17 weeks. Throughout the season, tie end predictions remain to be the best. Although the quarter back prediction is the worst in general, it is not always the worst. The MAE of the quarter back prediction is lower than the defense prediction in Week 4, 10, and 15. MAE of each position varies week to week and displays large swing sometimes. For example, the MAE of the previous week could be as twice as this week.
 
 # Summary
+
 In summary, you learned how to calculate commonly used performance metrics and apply them to fantasy football data for different questions. The results can help evaluate the predictability of the data that hopefully can benefit your decision making in drafting players.  The codes can be applicable to another data source or another reason, which could result in different conclusions about performance. 
 
 Since the prediction provided from online platforms has noticeable errors, our next topic is to explore approaches to improve these predicted points and/or create our own prediction.
 
+### Reference
+Botchkarev 2019: A New Typology Design of Performance Metrics to Measure Errors in Machine Learning Regression Algorithms, Interdisciplinary Journal of Information, Knowledge, and Management, 14, 45-76, https://doi.org/10.28945/4184

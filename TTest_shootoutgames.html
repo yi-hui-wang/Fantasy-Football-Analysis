@@ -172,6 +172,176 @@ pre code {
 
 <div id="topic-does-drafting-players-from-shoot-out-games-increase-the-chance-of-winning-money-in-a-daily-league" class="section level1">
 <h1>Topic: Does drafting players from shoot-out games increase the chance of winning money in a daily league?</h1>
+<p>Predicted points are not perfect, so it is challenging to create a winning lineup from hundreds of players based on these predictions. Since it is difficult to make an accurate prediction, it may be easier to predict shoot-out games. If we can predict shoot-out games, we could narrow down the pool to the players in those games, who are more likely to outperform many players. In this topic, we aim to investigate whether drafting players from shoot-out games leads to a higher total score than drafting players from all games using a common hypothesis testing.</p>
+<div id="statistical-concepts" class="section level2">
+<h2>Statistical Concepts</h2>
+<p>To answer this question, we will use a common hypothesis testing, t-test, to compare the mean total score of lineups from players in shoot-out games only with that from players in all games. The t-test is an objective approach to determine whether the mean of one group is different (or better/less) than the mean of the other group.</p>
+<div id="t-test" class="section level3">
+<h3>T-test</h3>
+<p>It is easy to use R to apply a t-test. Using the function, t.test, all we need are the data from two samples: the total actual score of each lineup drafted from players in shoot-out games and that from players in all games. The function outputs t statistic, degrees of freedom, p-value, alternative hypothesis, 95% confidence interval, and the mean of each sample.</p>
+<p>The general idea of a hypothesis test is to examine a claim about a conjecture. The claim is often expressed as an alternative hypothesis as opposed to a null hypothesis, which assumes no difference between two groups in the two-sample test. In this case, our conjecture is whether the mean total score of lineups from shoot-out games is better than that from all games. To determine whether the data collected support the claim, one key output is the p-value. P-value represents the chance of getting the result from collected data if the null hypothesis is true. Here the p-value is the chance of getting the difference in the mean total score between two sample data, assuming one group is not better than the other. The lower the p-value, the more unlikely to get what collected data show if the null hypothesis is true. In other words, a very small p-value implies that a rejection of the null hypothesis, and thus a support for the alternative hypothesis. In this example, a small p-value would imply that the difference between two groups is significant, meaning that it is unlikely to be due to random chance when there is no difference.</p>
+<p>Another output that can be used for drawing a conclusion is a confidence interval. A confidence interval and hypothesis test are like two sides of a story. Their results must be consistent to reach a same conclusion. If the alternative hypothesis, drafting from shoot-out games is better than drafting from all games, the confidence interval of the difference between the mean from shoot-out games and the mean from all games must be greater than 0.</p>
+<p>Note that the default of the t.test function is to perform a two-sided test, that is to examine if the mean from two groups is different or not. To perform a one-sided test like our example, we need to add ‘alternative = greater’, instructing to examine if the mean from shoot-out games is greater than that from all games. On the contrary, if you want to investigate whether the mean from Group 1 is less than that from Group 2, you need to use ‘alternative = less’.</p>
+<p>Another default in the function is to use Welch’s t-test, assuming two groups have difference variance. It is reasonable to have Welch’s t-test in our example. If the two groups you use appear to have same variance, you can add ‘var.equal = TRUE’ to convert to a two-sample t-test. For a two-sample t-test, it uses pooled degrees of freedom that could lead to a slightly different t-distribution, and thus a slightly different p-value.</p>
+</div>
+</div>
+</div>
+<div id="exploring-the-data" class="section level1">
+<h1>Exploring the data</h1>
+<pre class="r"><code>library(dplyr)
+library(ggplot2)</code></pre>
+<p>We use Week 15 in 2020 season for demonstration. As the p-value using different samples would be different, the conclusion may change if choosing another week. But the concept and analysis are applicable to other weeks or seasons.</p>
+<p>Here shoot-out games are defined as the top four games that had most combined points from two teams. Four games are a quarter of games for a typical week without any bye. In Week 15, the shoot-out games are: Buffalo Bills, Detroit Lions, New Orleans Saints, San Francisco 49ers, Tennessee Titans, Denver Broncos, Kansas City Chiefs, Dallas Cowboys.</p>
+<p>To perform the t-test, the first step is to load 70 lineups based on predictions, optimized by the Genetic Algorithm (GA) (topic link) from the dataset with players in shoot-out games and the dataset with all players, respectively. As a small sample size does not meet the assumption of data normality in t-test, we chose 70 to balance sample size and running time. If you only have a small sample of data, you can use a nonparametric test like bootstrap instead of t-test.</p>
+<pre class="r"><code>### load GA between shoot-out games and all games
+ga.shootout.wk15 &lt;- read.csv(&quot;D:/fantasyfootball/data2020/GA_2020week15_fantasypro_totalscores.csv&quot;)
+ga.all.wk15 &lt;- read.csv(&quot;D:/fantasyfootball/data2020/GA_2020week15_fantasypro_allgames.csv&quot;)
+
+# eliminate unwanted columns for better display
+ga.shootout.wk15 &lt;- ga.shootout.wk15 %&gt;% select(-X.1, -Unnamed..0, -X, -h.a, -Oppt)
+
+# snapshot of the file
+print(ga.shootout.wk15[1:20,])</code></pre>
+<pre><code>##    Week Year             Name Position Team DK.points Salary      Points
+## 1    15 2020       Josh Allen       QB  buf     40.66   7200        21.1
+## 2    15 2020    D'Andre Swift       RB  det      23.2   6400        16.0
+## 3    15 2020     Alvin Kamara       RB  nor      18.4   7400 25.81060643
+## 4    15 2020    Brandon Aiyuk       WR  sfo      22.3   6300        16.3
+## 5    15 2020       A.J. Brown       WR  ten      15.4   7600        17.6
+## 6    15 2020 Emmanuel Sanders       WR  nor      11.6   4200        13.4
+## 7    15 2020   Danny Amendola       WR  det       5.0   4200        10.0
+## 8    15 2020       Jared Cook       TE  nor       4.9   3400        10.1
+## 9    15 2020        Seahawks       DST  sea       9.0   3100         8.5
+## 10                                                                      
+## 11 Week Year             Name Position Team DK.points Salary      Points
+## 12   15 2020       Drew Brees       QB  nor     20.36   5900        17.6
+## 13   15 2020     Alvin Kamara       RB  nor      18.4   7400 25.81060643
+## 14   15 2020 Devin Singletary       RB  buf      17.4   4100         9.5
+## 15   15 2020      Corey Davis       WR  ten      24.0   5800        14.6
+## 16   15 2020    Brandon Aiyuk       WR  sfo      22.3   6300        16.3
+## 17   15 2020 Emmanuel Sanders       WR  nor      11.6   4200        13.4
+## 18   15 2020      Tim Patrick       WR  den       4.4   4300        11.3
+## 19   15 2020     Travis Kelce       TE  kan      22.8   8000        18.9
+## 20   15 2020        Steelers       DST  pit       2.0   3900        13.7</code></pre>
+<p>Here is the snapshot of the file, which shows the information of each lineup, including players, positions, team, salary, actual point (i.e. DK.points), and predicted point (i.e. Points).</p>
+<pre class="r"><code>### document total scores and salary of each lineup
+# keep columns needed
+ga.shootout.small &lt;- ga.shootout.wk15 %&gt;% select(DK.points, Salary, Points)
+ga.all.small &lt;- ga.all.wk15 %&gt;% select(DK.points, Salary, Points)
+
+ist &lt;- seq(1, nrow(ga.shootout.wk15), by = 11)
+shootout.info &lt;- data.frame()
+all.info &lt;- data.frame()
+
+# keep total scores and salary only
+for (i in 1:length(ist)){
+  # lineups from shoot-out games
+  shootouti &lt;- ga.shootout.small[ist[i]:(ist[i]+8),] 
+  shootouti &lt;- sapply(shootouti, as.numeric)
+  shootout.info &lt;- bind_rows(shootout.info, colSums(shootouti))
+  
+  # lineups from all games
+  alli &lt;- ga.all.small[ist[i]:(ist[i]+8),] 
+  alli &lt;- sapply(alli, as.numeric)
+  all.info &lt;- bind_rows(all.info, colSums(alli))
+}
+
+head(shootout.info)</code></pre>
+<pre><code>##   DK.points Salary   Points
+## 1    150.46  49800 138.8106
+## 2    143.26  49900 141.1106
+## 3    168.86  49700 137.5106
+## 4    137.46  49800 138.8106
+## 5    174.26  49900 135.8106
+## 6    156.82  49900 140.0106</code></pre>
+<p>For t-test, we created a data frame that combines the total actual point of each lineup in the same group. We also included the total salary and total predicted point so now there are three columns in the data frame.</p>
+<pre class="r"><code>### perform t-test
+# Welch's t-test
+ttest &lt;- t.test(shootout.info$DK.points, all.info$DK.points, alternative = &quot;greater&quot;)
+print(ttest)</code></pre>
+<pre><code>## 
+##  Welch Two Sample t-test
+## 
+## data:  shootout.info$DK.points and all.info$DK.points
+## t = 7.0071, df = 137.87, p-value = 4.923e-11
+## alternative hypothesis: true difference in means is greater than 0
+## 95 percent confidence interval:
+##  15.57563      Inf
+## sample estimates:
+## mean of x mean of y 
+##  150.0554  129.6597</code></pre>
+<p>The output shows that the p-value is nearly 0, indicating the rejection of the no-difference hypothesis in favor of our conjecture. In Week 15, the mean total actual score using players in shoot-out games is about 150 and that in all games is about 130, a 20-point difference can for sure make a positive impact on your winning record in a daily league!</p>
+<p>The result makes sense to us. But you may wonder if there is a week showing no significant difference between the two groups. We can repeat the t-test to lineups from Week 1 to Week 15.</p>
+<pre class="r"><code>### loop through all weeks
+diffmean_wk &lt;- c()
+p_wk &lt;- c()
+
+for (iwk in seq(1,15)){
+  ga.shootout &lt;- read.csv(paste0('D:/fantasyfootball/data2020/GA_2020week',iwk,'_fantasypro_totalscores.csv')) %&gt;% 
+    select(DK.points, Salary, Points)
+  ga.all &lt;- read.csv(paste0('D:/fantasyfootball/data2020/GA_2020week',iwk,'_fantasypro_allgames.csv')) %&gt;%
+    select(DK.points, Salary, Points)
+  
+  ist &lt;- seq(1, nrow(ga.shootout), by = 11)
+  shootout.info &lt;- data.frame()
+  all.info &lt;- data.frame()
+  
+  # keep total scores and salary only
+  for (i in 1:length(ist)){
+    # lineups from shoot-out games
+    shootouti &lt;- ga.shootout[ist[i]:(ist[i]+8),] 
+    shootouti &lt;- sapply(shootouti, as.numeric)
+    shootout.info &lt;- bind_rows(shootout.info, colSums(shootouti))
+    
+    # lineups from all games
+    alli &lt;- ga.all[ist[i]:(ist[i]+8),] 
+    alli &lt;- sapply(alli, as.numeric)
+    all.info &lt;- bind_rows(all.info, colSums(alli))
+  }
+  ttest &lt;- t.test(shootout.info$DK.points, all.info$DK.points, alternative = &quot;greater&quot;)
+  
+  # difference in means
+  diffmean_wk[iwk] &lt;- ttest$estimate[1]-ttest$estimate[2]
+  
+  # p-value
+  p_wk[iwk] &lt;- ttest$p.value
+}
+
+comp.df &lt;- data.frame(weeki = seq(1,15), difference_mean = diffmean_wk, p_value = p_wk) %&gt;%
+  mutate(Color = ifelse(p_value &lt;=0.05, &quot;p &lt;= 0.05&quot;, &quot;p &gt; 0.05&quot;))
+
+print(comp.df)</code></pre>
+<pre><code>##    weeki difference_mean      p_value     Color
+## 1      1       42.407429 1.641925e-18 p &lt;= 0.05
+## 2      2        9.292857 1.787811e-02 p &lt;= 0.05
+## 3      3       30.575714 1.826601e-15 p &lt;= 0.05
+## 4      4       20.186571 2.799241e-08 p &lt;= 0.05
+## 5      5        5.348286 3.749798e-02 p &lt;= 0.05
+## 6      6       29.704286 1.887363e-16 p &lt;= 0.05
+## 7      7       25.778857 1.384226e-09 p &lt;= 0.05
+## 8      8      -17.572000 9.999997e-01  p &gt; 0.05
+## 9      9        5.124286 8.242504e-02  p &gt; 0.05
+## 10    10       34.341714 8.176947e-20 p &lt;= 0.05
+## 11    11       32.769143 1.179018e-20 p &lt;= 0.05
+## 12    12       14.022857 9.779276e-04 p &lt;= 0.05
+## 13    13      -18.776857 9.999976e-01  p &gt; 0.05
+## 14    14       12.290286 9.672682e-07 p &lt;= 0.05
+## 15    15       20.395714 4.922687e-11 p &lt;= 0.05</code></pre>
+<pre class="r"><code>### plot of difference in means over weeks
+ggplot(data = comp.df, aes(x = weeki, y = difference_mean)) +
+  geom_line() +
+  geom_point(data = comp.df, aes(x = weeki, y = difference_mean, color = Color), size = 3) +
+  xlab(&quot;week number&quot;) +
+  ylab(&quot;mean(shootout) - mean(all)&quot;)</code></pre>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+<p>Here is the difference between two means from the sample data and their p-values in each week. Among 15 weeks, 12 of them support our conjecture using the significance level, 0.05. Thus, we are confident that there is a better chance to create a winning lineup drafting from players in shoot-out games.</p>
+</div>
+<div id="summary" class="section level1">
+<h1>Summary</h1>
+<p>In this topic, we used the t-test to investigate whether drafting players from shoot-out games only improves our daily leagues performance compared to drafting from all games. In real life, we wouldn’t know which games are shoot-out games until games are played. Therefore, our next effort is to predict shoot-out games with uncertainty so our drafting can focus on the players in those games.</p>
+</div>
+<div id="reference" class="section level1">
+<h1>Reference</h1>
 </div>
 
 

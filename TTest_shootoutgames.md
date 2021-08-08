@@ -1,0 +1,13 @@
+---
+title: "T-Test to evaluate drafting from shoot-out games"
+author: "yi-hui-wang"
+date: "August 7, 2021"
+output: 
+  html_document: 
+    keep_md: yes
+---
+
+
+
+# Topic: Does drafting players from shoot-out games increase the chance of winning money in a daily league?
+
